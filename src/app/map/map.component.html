@@ -1,25 +1,30 @@
 <div class="container">
-    <div class="card controls">
-      <label>Origen:</label>
-      <select #origen (change)="setOrigen(origen.value)">
-        <option *ngFor="let ciudad of ciudades" [value]="ciudad">{{ ciudad }}</option>
-      </select>
-  
-      <label>Destino:</label>
-      <select #destino (change)="setDestino(destino.value)">
-        <option *ngFor="let ciudad of ciudades" [value]="ciudad">{{ ciudad }}</option>
-      </select>
-  
-      <label>Algoritmo:</label>
-      <select #algoritmo (change)="setAlgoritmo(algoritmo.value)">
-        <option value="DFS">DFS</option>
-        <option value="BFS">BFS</option>
-        <option value="UCS">Costo Uniforme</option>
-      </select>
-  
-      <button class="btn" (click)="calcularRuta()">Calcular ruta</button>
-    </div>
-    <div id="map" style="height: 600px; width: 100%;"></div>
+  <div class="card controls">
+    <label>Origen:</label>
+    <select #origen (change)="setOrigen(origen.value)">
+      <option value="" disabled selected>Elija la ciudad de origen</option>
+      <option *ngFor="let ciudad of ciudades" [value]="ciudad">
+        {{ ciudad }}
+      </option>
+    </select>
 
+    <label>Destino:</label>
+    <select #destino (change)="setDestino(destino.value)">
+      <option value="" disabled selected>Elija la ciudad de destino</option>
+      <option *ngFor="let ciudad of ciudades" [value]="ciudad">
+        {{ ciudad }}
+      </option>
+    </select>
+
+    <label>Algoritmo:</label>
+    <select #algoritmo (change)="setAlgoritmo(algoritmo.value)">
+      <option value="" disabled selected>Elija el algoritmo de búsqueda</option>
+      <option value="1">A*</option>
+      <option value="2">Búsqueda Voraz</option>
+      <option value="3">Dijkstra</option>
+    </select>
+
+    <button class="btn" (click)="calcularRuta()">Calcular ruta</button>
   </div>
-  
+  <div id="map" style="height: 600px; width: 100%"></div>
+</div>
