@@ -1,0 +1,53 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .card.controls {
+    background-color: #ffffff;
+    padding: 20px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  
+    label {
+      font-weight: bold;
+    }
+  
+    select {
+      padding: 5px 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+  
+    .btn {
+      padding: 8px 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+  
+      &:hover {
+        background-color: #0056b3;
+      }
+    }
+  }
+  
+  .map-card {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  #map {
+    height: 600px;
+    width: 100%;
+  }
+  @import "~leaflet/dist/leaflet.css";
