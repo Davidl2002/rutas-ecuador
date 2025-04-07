@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import * as L from 'leaflet';
 import { MapService } from './map.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-map',
@@ -17,7 +18,11 @@ export class MapComponent implements OnInit {
   private grafo: { [ciudad: string]: { [vecino: string]: number } } = {};
   private coordenadas: { [ciudad: string]: [number, number] } = {};
 
-  constructor(private mapService: MapService) { }
+  constructor(private mapService: MapService, private router: Router) { }
+
+  navigateToEditRoute() {
+    this.router.navigate(['/editar-ruta']);
+  }
 
   ngOnInit(): void {
     this.cargarDatos();
@@ -70,6 +75,17 @@ export class MapComponent implements OnInit {
   }
 
   calcularRuta(): void {
+    if (this.origen === this.destino) {
+      alert('El origen y el destino no pueden ser iguales.');
+      return;
+    }
+
+
+    if (Object.keys(this.coordenadas).length === 0 || Object.keys(this.grafo).length === 0) {
+      alert('Los datos aún se están cargando. Por favor espera un momento.');
+      return;
+    }
+
     if (!this.origen || !this.destino || !this.algoritmo) {
       alert('Por favor, selecciona origen, destino y algoritmo.');
       return;
@@ -110,8 +126,11 @@ export class MapComponent implements OnInit {
           fillOpacity: 0.5
         }).addTo(this.map);
 
+        // Mostrar tooltip con los vecinos de la ciudad
+        circle.bindTooltip(`Vecinos: ${Object.keys(this.grafo[ciudad]).join(', ')}`);
+
         // Personalizar el popup con información adicional
-        circle.bindPopup(`
+        circle.bindPopup(` 
           <b>${ciudad}</b><br>
           ${index === 0 ? 'Origen' : index === listaCiudades.length - 1 ? 'Destino' : 'Paso ' + index}<br>
           ${index < listaCiudades.length - 1 ? 'Distancia siguiente: ' + this.grafo[ciudad][listaCiudades[index + 1]] + ' km' : ''}
@@ -142,4 +161,5 @@ export class MapComponent implements OnInit {
       this.map.fitBounds(polyline.getBounds());
     }
   }
+
 }

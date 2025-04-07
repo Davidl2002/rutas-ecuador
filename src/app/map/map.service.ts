@@ -64,4 +64,15 @@ export class MapService {
             destino: destino
         });
     }
+
+  // Función para eliminar una ciudad
+  eliminarCiudad(ciudad: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/city/${ciudad}`);
+  }
+
+  // Función para agregar una ciudad
+  agregarCiudad(ciudad: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/city`, ciudad);
+  }
+      
 }

@@ -1,0 +1,47 @@
+<div class="container">
+    <h2>Editar Ruta</h2>
+  
+    <!-- Tabla con las relaciones de las ciudades -->
+    <table>
+      <thead>
+        <tr>
+          <th>Ciudad</th>
+          <th>Vecinos</th>
+          <th>Distancia</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let ciudad of ciudades">
+          <td>{{ ciudad.name }}</td>
+          <td>{{ ciudad.vecinos | json }}</td>
+          <td>{{ ciudad.distancia }}</td>
+          <td>
+            <button (click)="eliminarCiudad(ciudad)">Eliminar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  
+    <button class="btn" (click)="mostrarFormulario()">Agregar Ciudad</button>
+  
+    <!-- Formulario para agregar nueva ciudad -->
+    <div *ngIf="mostrarFormularioFlag">
+      <form (submit)="agregarCiudad()">
+        <label>Nombre:</label>
+        <input type="text" #nombre placeholder="Nombre de la ciudad" />
+  
+        <label>Latitud:</label>
+        <input type="number" #latitud placeholder="Latitud" step="0.01" />
+  
+        <label>Longitud:</label>
+        <input type="number" #longitud placeholder="Longitud" step="0.01" />
+  
+        <label>Vecinos (separados por coma):</label>
+        <input type="text" #vecinos placeholder="Vecinos" />
+  
+        <button type="submit">Agregar</button>
+      </form>
+    </div>
+  </div>
+  
