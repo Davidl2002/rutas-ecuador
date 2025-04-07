@@ -65,14 +65,14 @@ export class MapService {
         });
     }
 
-  // Función para eliminar una ciudad
-  eliminarCiudad(ciudad: string): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/city/${ciudad}`);
-  }
+    // Función para eliminar una ciudad
+    eliminarCiudad(data: any): Observable<any> {
+        return this.http.post<any>(`${this.apiUrl}/graph/delete-city`, data);
+    }
 
-  // Función para agregar una ciudad
-  agregarCiudad(ciudad: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/city`, ciudad);
-  }
-      
+    // Función para agregar una ciudad
+    agregarCiudad(data: any): Observable<any> {
+        return this.http.post<any>(`${this.apiUrl}/graph/add-city`, data);
+    }
+
 }

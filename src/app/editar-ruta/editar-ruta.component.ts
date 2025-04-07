@@ -41,7 +41,12 @@ export class EditarRutaComponent implements OnInit {
   // Función para eliminar una ciudad
   eliminarCiudad(ciudad: any): void {
     if (confirm(`¿Estás seguro de que deseas eliminar ${ciudad.name}?`)) {
-      this.mapService.eliminarCiudad(ciudad.name).subscribe({
+      const data: any = {
+        intermedia: ciudad.name,
+        ciudad1: "Ambato",
+        ciudad2: "Baños",
+      }
+      this.mapService.eliminarCiudad(data).subscribe({
         next: () => {
           alert('Ciudad eliminada con éxito');
           this.cargarCiudades(); // Volver a cargar las ciudades
