@@ -7,15 +7,19 @@
       <tr>
         <th>Ciudad</th>
         <th>Vecinos</th>
-        <th>Distancia</th>
         <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let ciudad of ciudades">
         <td>{{ ciudad.name }}</td>
-        <td>{{ ciudad.vecinos | json }}</td>
-        <td>{{ ciudad.distancia }}</td>
+        <td>
+          <ul>
+            <li *ngFor="let vecino of ciudad.vecinos | keyvalue">
+              {{ vecino.key }}: {{ vecino.value }} km
+            </li>
+          </ul>
+        </td>
         <td>
           <button (click)="eliminarCiudad(ciudad)">Eliminar</button>
         </td>
