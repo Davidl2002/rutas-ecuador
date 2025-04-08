@@ -1,7 +1,19 @@
 import { Component, OnInit } from '@angular/core';
-import * as L from 'leaflet';
 import { MapService } from './map.service';
 import { Router } from '@angular/router';
+import Map from 'ol/Map';
+import View from 'ol/View';
+import TileLayer from 'ol/layer/Tile';
+import OSM from 'ol/source/OSM';
+import { fromLonLat, toLonLat } from 'ol/proj';
+import VectorSource from 'ol/source/Vector';
+import VectorLayer from 'ol/layer/Vector';
+import Feature from 'ol/Feature';
+import Point from 'ol/geom/Point';
+import LineString from 'ol/geom/LineString';
+import { Style, Stroke, Fill, Circle as CircleStyle } from 'ol/style';
+import { Icon, Text } from 'ol/style';
+import { Circle as CircleGeom } from 'ol/geom';
 
 @Component({
   selector: 'app-map',
@@ -9,7 +21,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./map.component.scss']
 })
 export class MapComponent implements OnInit {
-  map!: L.Map;
+  map!: Map;
   origen: string = '';
   destino: string = '';
   algoritmo: string = 'DFS';
@@ -17,8 +29,9 @@ export class MapComponent implements OnInit {
   ruta: string[] = [];
   private grafo: { [ciudad: string]: { [vecino: string]: number } } = {};
   private coordenadas: { [ciudad: string]: [number, number] } = {};
+  private vectorSource = new VectorSource();
 
-  constructor(private mapService: MapService, private router: Router) { }
+  constructor(private mapService: MapService, private router: Router) {}
 
   navigateToEditRoute() {
     this.router.navigate(['/editar-ruta']);
@@ -27,28 +40,19 @@ export class MapComponent implements OnInit {
   ngOnInit(): void {
     this.cargarDatos();
     this.inicializarMapa();
-
-    setTimeout(() => {
-      if (this.map) {
-        this.map.invalidateSize();
-      }
-    }, 0);
   }
 
   private cargarDatos(): void {
-    // Cargar lista de ciudades
     this.mapService.getCiudades().subscribe({
       next: (ciudades) => this.ciudades = ciudades,
       error: (err) => console.error('Error al obtener ciudades:', err)
     });
 
-    // Cargar grafo simple
     this.mapService.getGrafoSimple().subscribe({
       next: (grafo) => this.grafo = grafo,
       error: (err) => console.error('Error al obtener grafo:', err)
     });
 
-    // Cargar coordenadas
     this.mapService.getCoordenadas().subscribe({
       next: (coords) => this.coordenadas = coords,
       error: (err) => console.error('Error al obtener coordenadas:', err)
@@ -56,10 +60,21 @@ export class MapComponent implements OnInit {
   }
 
   inicializarMapa(): void {
-    this.map = L.map('map').setView([-1.5, -78.5], 7);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(this.map);
+    this.map = new Map({
+      target: 'map',
+      layers: [
+        new TileLayer({
+          source: new OSM()
+        }),
+        new VectorLayer({
+          source: this.vectorSource
+        })
+      ],
+      view: new View({
+        center: fromLonLat([-78.5, -1.5]),
+        zoom: 7
+      })
+    });
   }
 
   setOrigen(value: string): void {
@@ -80,7 +95,6 @@ export class MapComponent implements OnInit {
       return;
     }
 
-
     if (Object.keys(this.coordenadas).length === 0 || Object.keys(this.grafo).length === 0) {
       alert('Los datos aún se están cargando. Por favor espera un momento.');
       return;
@@ -91,75 +105,86 @@ export class MapComponent implements OnInit {
       return;
     }
 
-    this.mapService.calcularRuta(this.origen, this.destino, this.algoritmo)
-      .subscribe({
-        next: (ruta) => {
-          this.ruta = ruta;
-          console.log(this.ruta);
-          this.mostrarRuta();
-        },
-        error: (err) => {
-          console.error('Error al calcular ruta:', err);
-          alert('Error al calcular la ruta. Verifica la conexión con el servidor.');
-        }
-      });
+    this.mapService.calcularRuta(this.origen, this.destino, this.algoritmo).subscribe({
+      next: (ruta) => {
+        this.ruta = ruta;
+        this.mostrarRuta();
+      },
+      error: (err) => {
+        console.error('Error al calcular ruta:', err);
+        alert('Error al calcular la ruta. Verifica la conexión con el servidor.');
+      }
+    });
   }
 
   private mostrarRuta(): void {
-    this.map.eachLayer((layer: any) => {
-      if (layer instanceof L.Polyline || layer instanceof L.Circle) {
-        this.map.removeLayer(layer);
-      }
-    });
-
+    this.vectorSource.clear();
     const [listaCiudades, distanciaTotal]: any = this.ruta;
-    const puntos: L.LatLng[] = [];
+    const puntos: [number, number][] = [];
 
-    listaCiudades.forEach((ciudad: any, index: any) => {
+    listaCiudades.forEach((ciudad: any, index: number) => {
       const coord = this.coordenadas[ciudad];
       if (coord) {
-        // Crear marcador con círculo
-        const circle = L.circle(coord, {
-          radius: 5000,
-          color: 'blue',
-          fillColor: '#3388ff',
-          fillOpacity: 0.5
-        }).addTo(this.map);
+        const punto = fromLonLat([coord[1], coord[0]]) as [number, number];
+        puntos.push(punto);
 
-        // Mostrar tooltip con los vecinos de la ciudad
-        circle.bindTooltip(`Vecinos: ${Object.keys(this.grafo[ciudad]).join(', ')}`);
+        const feature = new Feature({
+          geometry: new Point(punto),
+          name: ciudad
+        });
 
-        // Personalizar el popup con información adicional
-        circle.bindPopup(` 
-          <b>${ciudad}</b><br>
-          ${index === 0 ? 'Origen' : index === listaCiudades.length - 1 ? 'Destino' : 'Paso ' + index}<br>
-          ${index < listaCiudades.length - 1 ? 'Distancia siguiente: ' + this.grafo[ciudad][listaCiudades[index + 1]] + ' km' : ''}
-        `).openPopup();
+        feature.setStyle(new Style({
+          image: new CircleStyle({
+            radius: 7,
+            fill: new Fill({ color: 'blue' }),
+            stroke: new Stroke({ color: '#3388ff', width: 2 })
+          }),
+          text: new Text({
+            text: ciudad,
+            offsetY: -15,
+            fill: new Fill({ color: 'black' }),
+            stroke: new Stroke({ color: 'white', width: 2 })
+          })
+        }));
 
-        puntos.push(L.latLng(coord[0], coord[1]));
+        this.vectorSource.addFeature(feature);
       }
     });
 
-    // Dibujar la línea de la ruta si hay suficientes puntos
     if (puntos.length > 1) {
-      const polyline = L.polyline(puntos, {
-        color: 'red',
-        weight: 5,
-        opacity: 0.7,
-        dashArray: '10, 10'
-      }).addTo(this.map);
+      const line = new LineString(puntos);
+      const routeFeature = new Feature({
+        geometry: line
+      });
 
-      // Mostrar la distancia total en un popup en el punto medio
-      const midPoint = Math.floor(puntos.length / 2);
-      const midCoord = puntos[midPoint];
-      L.popup()
-        .setLatLng(midCoord)
-        .setContent(`<b>Distancia total:</b> ${distanciaTotal} km`)
-        .openOn(this.map);
+      routeFeature.setStyle(new Style({
+        stroke: new Stroke({
+          color: 'red',
+          width: 3,
+          lineDash: [10, 10]
+        })
+      }));
 
-      // Ajustar el mapa para mostrar toda la ruta
-      this.map.fitBounds(polyline.getBounds());
+      this.vectorSource.addFeature(routeFeature);
+
+      const midPointIndex = Math.floor(puntos.length / 2);
+      const midCoord = puntos[midPointIndex];
+      const midFeature = new Feature({
+        geometry: new Point(midCoord)
+      });
+
+      midFeature.setStyle(new Style({
+        text: new Text({
+          text: `Distancia total: ${distanciaTotal} km`,
+          offsetY: -25,
+          fill: new Fill({ color: 'red' }),
+          stroke: new Stroke({ color: 'white', width: 3 })
+        })
+      }));
+
+      this.vectorSource.addFeature(midFeature);
     }
-  }
 
+    this.map.getView().fit(this.vectorSource.getExtent(), { padding: [50, 50, 50, 50], duration: 1000 });
+  }
 }

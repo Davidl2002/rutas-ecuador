@@ -15,13 +15,19 @@ export class EditarRutaComponent implements OnInit {
   @ViewChild('nombre') nombreInput!: ElementRef;
   @ViewChild('latitud') latitudInput!: ElementRef;
   @ViewChild('longitud') longitudInput!: ElementRef;
-  @ViewChild('vecinos') vecinosInput!: ElementRef;
+  @ViewChild('ciudad1') ciudad1Input!: ElementRef;
+  @ViewChild('ciudad2') ciudad2Input!: ElementRef;
+  @ViewChild('distancia1') distancia1Input!: ElementRef;
 
   constructor(private mapService: MapService, private router: Router) { }
 
   ngOnInit(): void {
     this.cargarCiudades(); // Cargar ciudades y sus relaciones
     console.log('Se ha cargado el componente Editar Ruta');
+  }
+
+  volverInicio(): void {
+    this.router.navigate(['/']);
   }
 
   // Función para cargar las ciudades con sus relaciones
@@ -64,26 +70,26 @@ export class EditarRutaComponent implements OnInit {
   // Función para agregar nueva ciudad
   agregarCiudad(): void {
     const nombre = this.nombreInput.nativeElement.value;
-    const latitud = this.latitudInput.nativeElement.value;
-    const longitud = this.longitudInput.nativeElement.value;
-    const vecinos = this.vecinosInput.nativeElement.value.split(',');
+    const latitud = parseFloat(this.latitudInput.nativeElement.value);
+    const longitud = parseFloat(this.longitudInput.nativeElement.value);
+    const ciudad1 = this.ciudad1Input.nativeElement.value;
+    const ciudad2 = this.ciudad2Input.nativeElement.value;
+    const distancia1 = parseFloat(this.distancia1Input.nativeElement.value);
 
     const nuevaCiudad = {
-      name: nombre,
-      coordenadas: {
-        latitud: parseFloat(latitud),
-        longitud: parseFloat(longitud)
-      },
-      vecinos: vecinos.reduce((acc: any, vecino: string) => {
-        acc[vecino.trim()] = 0; // Establecer distancia predeterminada
-        return acc;
-      }, {})
+      ciudad1: ciudad1,
+      ciudad2: ciudad2 || null,
+      nueva: nombre,
+      distancia1: distancia1,
+      latitud: latitud,
+      longitud: longitud
     };
 
     this.mapService.agregarCiudad(nuevaCiudad).subscribe({
       next: () => {
         alert('Ciudad agregada con éxito');
-        this.cargarCiudades(); // Volver a cargar las ciudades
+        this.cargarCiudades();
+        this.mostrarFormularioFlag = false;
       },
       error: (err) => console.error('Error al agregar ciudad:', err)
     });
