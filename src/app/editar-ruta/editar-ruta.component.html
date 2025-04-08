@@ -1,4 +1,11 @@
 <div class="container">
+  <div class="header-actions">
+    <button class="btn" (click)="mostrarFormulario()">Agregar Ciudad</button>
+    <button class="btn volver-btn" (click)="volverInicio()">
+      Volver a Inicio
+    </button>
+  </div>
+
   <h2>Editar Ruta</h2>
 
   <!-- Tabla con las relaciones de las ciudades -->
@@ -17,43 +24,92 @@
         <td>{{ ciudad.vecinos | json }}</td>
         <td>{{ ciudad.distancia }}</td>
         <td>
-          <button (click)="eliminarCiudad(ciudad)">Eliminar</button>
+          <button class="btn-eliminar" (click)="eliminarCiudad(ciudad)">
+            Eliminar
+          </button>
         </td>
       </tr>
     </tbody>
   </table>
 
-  <button class="btn" (click)="mostrarFormulario()">Agregar Ciudad</button>
+  <!-- Modal para agregar nueva ciudad -->
+  <div class="modal" *ngIf="mostrarFormularioFlag">
+    <div class="modal-content">
+      <span class="close" (click)="mostrarFormularioFlag = false">&times;</span>
+      <h3>Agregar Nueva Ciudad</h3>
+      <form (submit)="agregarCiudad($event)">
+        <div class="form-group">
+          <label>Nombre de la nueva ciudad:</label>
+          <input
+            type="text"
+            #nombre
+            placeholder="Nombre de la ciudad"
+            required
+          />
+        </div>
 
-  <!-- Formulario para agregar nueva ciudad -->
-  <div *ngIf="mostrarFormularioFlag">
-    <form (submit)="agregarCiudad()">
-      <label>Nombre de la nueva ciudad:</label>
-      <input type="text" #nombre placeholder="Nombre de la ciudad" required />
+        <div class="form-group">
+          <label>Latitud:</label>
+          <input
+            type="number"
+            #latitud
+            placeholder="Latitud"
+            step="0.00001"
+            required
+          />
+        </div>
 
-      <label>Latitud:</label>
-      <input type="number" #latitud placeholder="Latitud" step="0.00001" required />
+        <div class="form-group">
+          <label>Longitud:</label>
+          <input
+            type="number"
+            #longitud
+            placeholder="Longitud"
+            step="0.00001"
+            required
+          />
+        </div>
 
-      <label>Longitud:</label>
-      <input type="number" #longitud placeholder="Longitud" step="0.00001" required />
+        <div class="form-group">
+          <label>Conecta con Ciudad 1:</label>
+          <select #ciudad1 required>
+            <option *ngFor="let ciudad of ciudades" [value]="ciudad.name">
+              {{ ciudad.name }}
+            </option>
+          </select>
+        </div>
 
-      <label>Conecta con Ciudad 1:</label>
-      <select #ciudad1 required>
-        <option *ngFor="let ciudad of ciudades" [value]="ciudad.name">{{ ciudad.name }}</option>
-      </select>
+        <div class="form-group">
+          <label>Distancia a Ciudad 1:</label>
+          <input
+            type="number"
+            #distancia1
+            placeholder="Distancia a Ciudad 1"
+            step="0.1"
+            required
+          />
+        </div>
 
-      <label>Distancia a Ciudad 1:</label>
-      <input type="number" #distancia1 placeholder="Distancia a Ciudad 1" step="0.1" required />
+        <div class="form-group">
+          <label>Conecta con Ciudad 2 (opcional):</label>
+          <select #ciudad2>
+            <option *ngFor="let ciudad of ciudades" [value]="ciudad.name">
+              {{ ciudad.name }}
+            </option>
+          </select>
+        </div>
 
-      <label>Conecta con Ciudad 2 (opcional):</label>
-      <select #ciudad2>
-        <option *ngFor="let ciudad of ciudades" [value]="ciudad.name">{{ ciudad.name }}</option>
-      </select>
-
-      <button type="submit" class="btn">Agregar Ciudad</button>
-    </form>
+        <div class="modal-actions">
+          <button
+            type="button"
+            class="btn btn-cancel"
+            (click)="mostrarFormularioFlag = false"
+          >
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary">Agregar Ciudad</button>
+        </div>
+      </form>
+    </div>
   </div>
-
-  <button class="btn volver-btn" (click)="volverInicio()">Volver a Inicio</button>
-
 </div>

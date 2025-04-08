@@ -37,7 +37,7 @@ export class EditarRutaComponent implements OnInit {
         this.ciudades = Object.keys(grafo).map((ciudad) => ({
           name: ciudad,
           vecinos: grafo[ciudad],
-          distancia: Object.values(grafo[ciudad]).reduce((sum, dist) => sum + dist, 0) // Sumar todas las distancias
+          distancia: Object.values(grafo[ciudad]).reduce((sum: number, dist: number) => sum + dist, 0) // Sumar todas las distancias
         }));
       },
       error: (err) => console.error('Error al cargar ciudades:', err)
@@ -64,18 +64,18 @@ export class EditarRutaComponent implements OnInit {
 
   // Función para mostrar el formulario de agregar ciudad
   mostrarFormulario(): void {
-    this.mostrarFormularioFlag = !this.mostrarFormularioFlag;
+    this.mostrarFormularioFlag = true;
   }
 
   // Función para agregar nueva ciudad
-  agregarCiudad(): void {
+  agregarCiudad(event?: Event): void {
+    event?.preventDefault();
     const nombre = this.nombreInput.nativeElement.value;
     const latitud = parseFloat(this.latitudInput.nativeElement.value);
     const longitud = parseFloat(this.longitudInput.nativeElement.value);
     const ciudad1 = this.ciudad1Input.nativeElement.value;
     const ciudad2 = this.ciudad2Input.nativeElement.value;
     const distancia1 = parseFloat(this.distancia1Input.nativeElement.value);
-
     const nuevaCiudad = {
       ciudad1: ciudad1,
       ciudad2: ciudad2 || null,
@@ -84,12 +84,18 @@ export class EditarRutaComponent implements OnInit {
       latitud: latitud,
       longitud: longitud
     };
+    console.log(nuevaCiudad)
 
     this.mapService.agregarCiudad(nuevaCiudad).subscribe({
       next: () => {
         alert('Ciudad agregada con éxito');
         this.cargarCiudades();
         this.mostrarFormularioFlag = false;
+        // Limpiar formulario
+        this.nombreInput.nativeElement.value = '';
+        this.latitudInput.nativeElement.value = '';
+        this.longitudInput.nativeElement.value = '';
+        this.distancia1Input.nativeElement.value = '';
       },
       error: (err) => console.error('Error al agregar ciudad:', err)
     });
