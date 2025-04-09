@@ -12,6 +12,13 @@ export class EditarRutaComponent implements OnInit {
   ciudadesRelacionadas: any[] = [];
   mostrarFormularioFlag: boolean = false;
   ciudad1Selected: boolean = false;
+  showConfirmModal: boolean = false;
+  
+  // Nuevas variables para el modal
+  showModal: boolean = false;
+  actionType: 'node' | 'relationship' = 'node'; // Para saber si se eliminará un nodo o una relación
+  ciudadToDelete: any;
+  ciudadRelaciones: any[] = [];
 
   @ViewChild('nombre') nombreInput!: ElementRef;
   @ViewChild('latitud') latitudInput!: ElementRef;
@@ -43,18 +50,44 @@ export class EditarRutaComponent implements OnInit {
   }
 
   eliminarCiudad(ciudad: any): void {
-    if (confirm(`¿Estás seguro de eliminar ${ciudad.name}?`)) {
-      const data = {
-        nombre_ciudad: ciudad.name,
-      };
-      this.mapService.deleteNode(data).subscribe({
-        next: () => {
-          alert('Ciudad eliminada correctamente.');
-          this.cargarCiudades();
-        },
-        error: (err) => console.error('Error al eliminar ciudad:', err),
-      });
-    }
+    this.ciudadToDelete = ciudad;
+    this.ciudadRelaciones = Object.keys(ciudad.vecinos).map(key => ({ name: key, distancia: ciudad.vecinos[key] }));
+    this.showModal = true; // Mostrar modal con opciones
+    this.showConfirmModal = false;
+    console.log(`Ciudad eliminada: ${ciudad.name}`);
+  }
+
+  eliminarNodo(): void {
+    const data = { nombre_ciudad: this.ciudadToDelete.name };
+    this.mapService.deleteNode(data).subscribe({
+      next: () => {
+        alert('Ciudad eliminada correctamente.');
+        this.cargarCiudades();
+        this.closeModal();
+      },
+      error: (err) => console.error('Error al eliminar ciudad:', err),
+    });
+  }
+
+  eliminarRelacion(relacion: any): void {
+    const data = {
+      ciudad1: this.ciudadToDelete.name,
+      ciudad2: relacion.name,
+    };
+    this.mapService.deleteRelationship(data).subscribe({
+      next: () => {
+        alert('Relación eliminada correctamente.');
+        this.cargarCiudades();
+        this.closeModal();
+      },
+      error: (err) => console.error('Error al eliminar relación:', err),
+    });
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.ciudadToDelete = null!;
+    this.ciudadRelaciones = [];
   }
 
   mostrarFormulario(): void {
@@ -113,4 +146,15 @@ export class EditarRutaComponent implements OnInit {
       ciudad.vecinos && ciudad.vecinos[ciudad1]
     );
   }
+
+  abrirConfirmacionEliminar(ciudad: any): void {
+    this.ciudadToDelete = ciudad;
+    this.showConfirmModal = true;
+  }
+
+  closeConfirmModal(): void {
+    this.showConfirmModal = false;
+    this.ciudadToDelete = null;
+  }
+
 }

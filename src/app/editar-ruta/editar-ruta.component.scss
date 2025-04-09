@@ -108,3 +108,70 @@ tr:nth-child(even) {
 .btn-eliminar:hover {
   background-color: #bb2d3b;
 }
+
+/* Estilo general para el modal */
+.modal {
+  display: none; /* Inicialmente oculto */
+  position: fixed; /* Fijo en la pantalla */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Fondo semi-transparente */
+  z-index: 1000; /* Para asegurarse de que el modal esté por encima de otros elementos */
+  justify-content: center;
+  align-items: center;
+  overflow: auto;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 400px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.modal-content button {
+  margin: 10px 0;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.modal-content button:hover {
+  background-color: #0056b3;
+}
+
+/* Estilo para el botón de cerrar */
+.modal-content .btn {
+  background-color: #dc3545;
+}
+
+.modal-content .btn:hover {
+  background-color: #c82333;
+}
+
+/* Si el modal está visible, lo mostramos */
+.modal.show {
+  display: flex; /* Mostrar el modal */
+}
+
+/* Animación de apertura */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal.show {
+  animation: fadeIn 0.5s;
+}

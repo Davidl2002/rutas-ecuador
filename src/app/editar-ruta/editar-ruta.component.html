@@ -65,9 +65,45 @@
           </ul>
         </td>
         <td>
-          <button class="btn btn-eliminar" (click)="eliminarCiudad(ciudad)">Eliminar</button>
+          <button class="btn btn-eliminar" (click)="abrirConfirmacionEliminar(ciudad)">Eliminar</button>
         </td>
       </tr>
     </tbody>
   </table>
+
+ <!-- Modal de confirmación de eliminación -->
+ <div class="modal" [ngClass]="{'show': showConfirmModal}">
+  <div class="modal-content">
+    <h3>¿Estás seguro de que deseas eliminar esta ciudad?</h3>
+    <p>Esta acción no puede deshacerse.</p>
+    <div class="modal-actions">
+      <button class="btn btn-confirmar" (click)="eliminarCiudad(ciudadToDelete)">Confirmar</button>
+      <button class="btn btn-cancelar" (click)="closeConfirmModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para eliminar nodo o relación -->
+<div class="modal" [ngClass]="{'show': showModal}">
+  <div class="modal-content">
+    <h3>Seleccionar acción</h3>
+    <button (click)="eliminarNodo()">Confirmar Eliminación de Nodo</button>
+    <button (click)="actionType = 'relationship'">Eliminar Relación</button>
+
+    <div *ngIf="actionType === 'relationship'">
+      <h4>Relaciones de {{ ciudadToDelete?.name }}</h4>
+      <ul>
+        <li *ngFor="let relacion of ciudadRelaciones">
+          <button (click)="eliminarRelacion(relacion)">Eliminar relación con {{ relacion.name }}</button>
+        </li>
+      </ul>
+    </div>
+
+    <div *ngIf="actionType === 'node'">
+    </div>
+
+    <button class="btn" (click)="closeModal()">Cerrar</button>
+  </div>
+</div>
+
 </div>
