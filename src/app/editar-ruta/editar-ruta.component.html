@@ -1,7 +1,35 @@
 <div class="container">
   <h2>Editar Ruta</h2>
+  <button class="btn volver-btn" (click)="volverInicio()">Volver a Inicio</button>
+  <button class="btn" (click)="mostrarFormulario()">Agregar Ciudad</button>
+  <div *ngIf="mostrarFormularioFlag">
+    <form (submit)="agregarCiudad()">
+      <label>Nombre de la nueva ciudad:</label>
+      <input type="text" #nombre placeholder="Nombre de la ciudad" required />
 
-  <!-- Tabla con las relaciones de las ciudades -->
+      <label>Latitud:</label>
+      <input type="number" #latitud placeholder="Latitud" step="0.00001" required />
+
+      <label>Longitud:</label>
+      <input type="number" #longitud placeholder="Longitud" step="0.00001" required />
+
+      <label>Conecta con Ciudad 1:</label>
+      <select #ciudad1 (change)="onCiudad1Change(ciudad1.value)" required>
+        <option *ngFor="let ciudad of ciudades" [value]="ciudad.name">{{ ciudad.name }}</option>
+      </select>
+
+      <label>Distancia a Ciudad 1:</label>
+      <input type="number" #distancia1 placeholder="Distancia a Ciudad 1" step="0.1" required />
+
+      <label>Conecta con Ciudad 2 (opcional):</label>
+      <select #ciudad2 [disabled]="!ciudad1Selected">
+        <option value="">-- Ninguna --</option>
+        <option *ngFor="let ciudad of ciudadesRelacionadas" [value]="ciudad.name">{{ ciudad.name }}</option>
+      </select>
+
+      <button type="submit" class="btn">Agregar Ciudad</button>
+    </form>
+  </div>
   <table>
     <thead>
       <tr>
@@ -26,38 +54,4 @@
       </tr>
     </tbody>
   </table>
-
-  <button class="btn" (click)="mostrarFormulario()">Agregar Ciudad</button>
-
-  <!-- Formulario para agregar nueva ciudad -->
-  <div *ngIf="mostrarFormularioFlag">
-    <form (submit)="agregarCiudad()">
-      <label>Nombre de la nueva ciudad:</label>
-      <input type="text" #nombre placeholder="Nombre de la ciudad" required />
-
-      <label>Latitud:</label>
-      <input type="number" #latitud placeholder="Latitud" step="0.00001" required />
-
-      <label>Longitud:</label>
-      <input type="number" #longitud placeholder="Longitud" step="0.00001" required />
-
-      <label>Conecta con Ciudad 1:</label>
-      <select #ciudad1 required>
-        <option *ngFor="let ciudad of ciudades" [value]="ciudad.name">{{ ciudad.name }}</option>
-      </select>
-
-      <label>Distancia a Ciudad 1:</label>
-      <input type="number" #distancia1 placeholder="Distancia a Ciudad 1" step="0.1" required />
-
-      <label>Conecta con Ciudad 2 (opcional):</label>
-      <select #ciudad2>
-        <option *ngFor="let ciudad of ciudades" [value]="ciudad.name">{{ ciudad.name }}</option>
-      </select>
-
-      <button type="submit" class="btn">Agregar Ciudad</button>
-    </form>
-  </div>
-
-  <button class="btn volver-btn" (click)="volverInicio()">Volver a Inicio</button>
-
 </div>

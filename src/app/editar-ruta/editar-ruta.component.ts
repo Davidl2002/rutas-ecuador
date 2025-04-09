@@ -8,10 +8,11 @@ import { Router } from '@angular/router';
   styleUrls: ['./editar-ruta.component.scss']
 })
 export class EditarRutaComponent implements OnInit {
-  ciudades: any[] = []; // Lista de ciudades con sus vecinos y distancias
-  mostrarFormularioFlag: boolean = false; // Flag para mostrar el formulario
+  ciudades: any[] = [];
+  ciudadesRelacionadas: any[] = [];
+  mostrarFormularioFlag: boolean = false;
+  ciudad1Selected: boolean = false;
 
-  // Usamos ViewChild para acceder a los elementos del formulario
   @ViewChild('nombre') nombreInput!: ElementRef;
   @ViewChild('latitud') latitudInput!: ElementRef;
   @ViewChild('longitud') longitudInput!: ElementRef;
@@ -19,55 +20,47 @@ export class EditarRutaComponent implements OnInit {
   @ViewChild('ciudad2') ciudad2Input!: ElementRef;
   @ViewChild('distancia1') distancia1Input!: ElementRef;
 
-  constructor(private mapService: MapService, private router: Router) { }
+  constructor(private mapService: MapService, private router: Router) {}
 
   ngOnInit(): void {
-    this.cargarCiudades(); // Cargar ciudades y sus relaciones
-    console.log('Se ha cargado el componente Editar Ruta');
+    this.cargarCiudades();
   }
 
   volverInicio(): void {
     this.router.navigate(['/']);
   }
 
-  // Función para cargar las ciudades con sus relaciones
   cargarCiudades(): void {
-    this.mapService.getGrafoSimple().subscribe({
+    this.mapService.getGrafo().subscribe({
       next: (grafo) => {
-        this.ciudades = Object.keys(grafo).map((ciudad) => ({
-          name: ciudad,
-          vecinos: grafo[ciudad],
-          distancia: Object.values(grafo[ciudad]).reduce((sum, dist) => sum + dist, 0) // Sumar todas las distancias
+        this.ciudades = Object.keys(grafo).map((nombre) => ({
+          name: nombre,
+          vecinos: grafo[nombre].vecinos,
         }));
       },
-      error: (err) => console.error('Error al cargar ciudades:', err)
+      error: (err) => console.error('Error al cargar ciudades:', err),
     });
   }
 
-  // Función para eliminar una ciudad
   eliminarCiudad(ciudad: any): void {
-    if (confirm(`¿Estás seguro de que deseas eliminar ${ciudad.name}?`)) {
-      const data: any = {
-        intermedia: ciudad.name,
-        ciudad1: "Ambato",
-        ciudad2: "Baños",
-      }
-      this.mapService.eliminarCiudad(data).subscribe({
+    if (confirm(`¿Estás seguro de eliminar ${ciudad.name}?`)) {
+      const data = {
+        nombre_ciudad: ciudad.name,
+      };
+      this.mapService.deleteNode(data).subscribe({
         next: () => {
-          alert('Ciudad eliminada con éxito');
-          this.cargarCiudades(); // Volver a cargar las ciudades
+          alert('Ciudad eliminada correctamente.');
+          this.cargarCiudades();
         },
-        error: (err) => console.error('Error al eliminar ciudad:', err)
+        error: (err) => console.error('Error al eliminar ciudad:', err),
       });
     }
   }
 
-  // Función para mostrar el formulario de agregar ciudad
   mostrarFormulario(): void {
     this.mostrarFormularioFlag = !this.mostrarFormularioFlag;
   }
 
-  // Función para agregar nueva ciudad
   agregarCiudad(): void {
     const nombre = this.nombreInput.nativeElement.value;
     const latitud = parseFloat(this.latitudInput.nativeElement.value);
@@ -76,22 +69,48 @@ export class EditarRutaComponent implements OnInit {
     const ciudad2 = this.ciudad2Input.nativeElement.value;
     const distancia1 = parseFloat(this.distancia1Input.nativeElement.value);
 
-    const nuevaCiudad = {
-      ciudad1: ciudad1,
-      ciudad2: ciudad2 || null,
-      nueva: nombre,
-      distancia1: distancia1,
-      latitud: latitud,
-      longitud: longitud
-    };
+    if (ciudad2) {
+      // Si hay dos ciudades, agregamos una intermedia
+      const intermedia = {
+        ciudad1,
+        ciudad2,
+        nueva: nombre,
+        distancia1,
+        latitud,
+        longitud,
+      };
+      this.mapService.addIntermediate(intermedia).subscribe({
+        next: () => {
+          alert('Ciudad intermedia agregada correctamente.');
+          this.cargarCiudades();
+          this.mostrarFormularioFlag = false;
+        },
+        error: (err) => console.error('Error al agregar ciudad intermedia:', err),
+      });
+    } else {
+      // Si solo hay una ciudad, agregamos nodo simple
+      const nodo = {
+        ciudad_existente: ciudad1,
+        nueva_ciudad: nombre,
+        distancia: distancia1,
+        latitud,
+        longitud,
+      };
+      this.mapService.addNode(nodo).subscribe({
+        next: () => {
+          alert('Ciudad agregada correctamente.');
+          this.cargarCiudades();
+          this.mostrarFormularioFlag = false;
+        },
+        error: (err) => console.error('Error al agregar ciudad:', err),
+      });
+    }
+  }
 
-    this.mapService.agregarCiudad(nuevaCiudad).subscribe({
-      next: () => {
-        alert('Ciudad agregada con éxito');
-        this.cargarCiudades();
-        this.mostrarFormularioFlag = false;
-      },
-      error: (err) => console.error('Error al agregar ciudad:', err)
-    });
+  onCiudad1Change(ciudad1: string): void {
+    this.ciudad1Selected = !!ciudad1;
+    this.ciudadesRelacionadas = this.ciudades.filter((ciudad) => 
+      ciudad.vecinos && ciudad.vecinos[ciudad1]
+    );
   }
 }
