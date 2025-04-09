@@ -58,7 +58,7 @@ export class EditarRutaComponent implements OnInit {
   }
 
   mostrarFormulario(): void {
-    this.mostrarFormularioFlag = true;
+    this.mostrarFormularioFlag = !this.mostrarFormularioFlag;
   }
 
   agregarCiudad(): void {
