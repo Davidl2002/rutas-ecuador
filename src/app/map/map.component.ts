@@ -31,7 +31,7 @@ export class MapComponent implements OnInit {
   private coordenadas: { [ciudad: string]: [number, number] } = {};
   private vectorSource = new VectorSource();
 
-  constructor(private mapService: MapService, private router: Router) {}
+  constructor(private mapService: MapService, private router: Router) { }
 
   navigateToEditRoute() {
     this.router.navigate(['/editar-ruta']);
@@ -91,7 +91,7 @@ export class MapComponent implements OnInit {
 
   calcularRuta(): void {
     if (this.origen === this.destino) {
-      alert('El origen y el destino no pueden ser iguales.');
+      alert('La ciudad de origen y destino no pueden ser iguales.');
       return;
     }
 

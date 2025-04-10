@@ -1,109 +1,313 @@
 <div class="container">
-  <h2>Editar Ruta</h2>
+  <h2>Gestión de Rutas</h2>
   <div class="header-actions">
-    <button class="btn volver-btn" (click)="volverInicio()">Volver a Inicio</button>
-    <button class="btn" (click)="mostrarFormulario()">Agregar Ciudad</button>
+    <button class="btn volver-btn" (click)="volverInicio()">
+      Volver a Inicio
+    </button>
+    <button class="btn" (click)="openAddCityModal()">Agregar Ciudad</button>
+    <button class="btn" (click)="openAddRelationshipModal()">
+      Agregar Ruta
+    </button>
   </div>
 
-  <div *ngIf="mostrarFormularioFlag" class="form-container">
-    <form (submit)="agregarCiudad()">
-      <div class="form-group">
-        <label for="nombre">Nombre de la nueva ciudad:</label>
-        <input type="text" #nombre id="nombre" placeholder="Nombre de la ciudad" required />
-      </div>
-
-      <div class="form-group">
-        <label for="latitud">Latitud:</label>
-        <input type="number" #latitud id="latitud" placeholder="Latitud" step="0.00001" required />
-      </div>
-
-      <div class="form-group">
-        <label for="longitud">Longitud:</label>
-        <input type="number" #longitud id="longitud" placeholder="Longitud" step="0.00001" required />
-      </div>
-
-      <div class="form-group">
-        <label for="ciudad1">Conecta con Ciudad 1:</label>
-        <select #ciudad1 id="ciudad1" (change)="onCiudad1Change(ciudad1.value)" required>
-          <option *ngFor="let ciudad of ciudades" [value]="ciudad.name">{{ ciudad.name }}</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="distancia1">Distancia a Ciudad 1:</label>
-        <input type="number" #distancia1 id="distancia1" placeholder="Distancia a Ciudad 1" step="0.1" required />
-      </div>
-
-      <div class="form-group">
-        <label for="ciudad2">Conecta con Ciudad 2 (opcional):</label>
-        <select #ciudad2 id="ciudad2" [disabled]="!ciudad1Selected">
-          <option value="">-- Ninguna --</option>
-          <option *ngFor="let ciudad of ciudadesRelacionadas" [value]="ciudad.name">{{ ciudad.name }}</option>
-        </select>
-      </div>
-
-      <button type="submit" class="btn">Agregar Ciudad</button>
-    </form>
+  <!-- Tabla de ciudades -->
+  <div *ngIf="loadingCiudades" class="loading-message">
+    Cargando ciudades...
   </div>
 
-  <table>
+  <table *ngIf="!loadingCiudades && ciudades?.length">
     <thead>
       <tr>
         <th>Ciudad</th>
-        <th>Vecinos</th>
+        <th>Rutas Directas</th>
         <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let ciudad of ciudades">
-        <td>{{ ciudad.name }}</td>
+        <td>{{ ciudad?.name }}</td>
         <td>
           <ul>
-            <li *ngFor="let vecino of ciudad.vecinos | keyvalue">
-              {{ vecino.key }}: {{ vecino.value }} km
+            <li *ngFor="let vecino of ciudad?.vecinos | keyvalue">
+              {{ vecino?.key }}: {{ vecino?.value }} km
             </li>
           </ul>
         </td>
-        <td>
-          <button class="btn btn-eliminar" (click)="abrirConfirmacionEliminar(ciudad)">Eliminar</button>
+        <td class="actions-cell">
+          <button
+            class="btn btn-eliminar"
+            (click)="abrirConfirmacionEliminar(ciudad)"
+          >
+            <span *ngIf="!loadingEliminar">Eliminar</span>
+            <span *ngIf="loadingEliminar">Eliminando...</span>
+          </button>
         </td>
       </tr>
     </tbody>
   </table>
 
- <!-- Modal de confirmación de eliminación -->
- <div class="modal" [ngClass]="{'show': showConfirmModal}">
-  <div class="modal-content">
-    <h3>¿Estás seguro de que deseas eliminar esta ciudad?</h3>
-    <p>Esta acción no puede deshacerse.</p>
-    <div class="modal-actions">
-      <button class="btn btn-confirmar" (click)="eliminarCiudad(ciudadToDelete)">Confirmar</button>
-      <button class="btn btn-cancelar" (click)="closeConfirmModal()">Cancelar</button>
+  <!-- Modal de confirmación de eliminación -->
+  <div class="modal" [ngClass]="{ show: showConfirmModal }">
+    <div class="modal-content">
+      <h3>¿Estás seguro de que deseas eliminar {{ ciudadToDelete?.name }}?</h3>
+      <p>Esta acción no puede deshacerse.</p>
+      <div class="modal-actions">
+        <button
+          class="btn btn-confirmar"
+          (click)="eliminarCiudad(ciudadToDelete)"
+          [disabled]="loadingEliminar"
+        >
+          <span *ngIf="!loadingEliminar">Confirmar</span>
+          <span *ngIf="loadingEliminar">Eliminando...</span>
+        </button>
+        <button class="btn btn-cancelar" (click)="closeConfirmModal()">
+          Cancelar
+        </button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Modal para eliminar nodo o relación -->
-<div class="modal" [ngClass]="{'show': showModal}">
-  <div class="modal-content">
-    <h3>Seleccionar acción</h3>
-    <button (click)="eliminarNodo()">Confirmar Eliminación de Nodo</button>
-    <button (click)="actionType = 'relationship'">Eliminar Relación</button>
+  <!-- Modal para eliminar nodo, relación o intermedia -->
+  <div class="modal" [ngClass]="{ show: showModal }">
+    <div class="modal-content">
+      <h3>Seleccionar acción para {{ ciudadToDelete?.name }}</h3>
 
-    <div *ngIf="actionType === 'relationship'">
-      <h4>Relaciones de {{ ciudadToDelete?.name }}</h4>
-      <ul>
-        <li *ngFor="let relacion of ciudadRelaciones">
-          <button (click)="eliminarRelacion(relacion)">Eliminar relación con {{ relacion.name }}</button>
-        </li>
-      </ul>
+      <div *ngIf="actionType === 'node'">
+        <button
+          class="btn btn-danger"
+          (click)="eliminarNodo()"
+          [disabled]="loadingEliminar"
+        >
+          <span *ngIf="!loadingEliminar"
+            >Eliminar Ciudad (R. Directas incluidas)</span
+          >
+          <span *ngIf="loadingEliminar">Eliminando...</span>
+        </button>
+        <button
+          class="btn"
+          (click)="actionType = 'relationship'"
+          style="margin-top: 10px"
+        >
+          Eliminar Relación
+        </button>
+        <button
+          *ngIf="ciudadToDelete"
+          class="btn btn-intermedia"
+          (click)="actionType = 'intermediate'"
+          style="margin-top: 10px"
+        >
+          Eliminar como Ciudad Intermedia
+        </button>
+      </div>
+
+      <div *ngIf="actionType === 'relationship'" style="margin-top: 20px">
+        <h4>Rutas Directas de {{ ciudadToDelete?.name }}</h4>
+        <ul class="relationship-list">
+          <li *ngFor="let relacion of ciudadRelaciones">
+            <button
+              class="btn btn-sm"
+              (click)="eliminarRelacion(relacion)"
+              [disabled]="loadingEliminar"
+            >
+              <span *ngIf="!loadingEliminar"
+                >Eliminar ruta con {{ relacion?.name }} ({{
+                  relacion?.distancia
+                }}
+                km)</span
+              >
+              <span *ngIf="loadingEliminar">Eliminando...</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div *ngIf="actionType === 'intermediate'" style="margin-top: 20px">
+        <h4>Eliminar como ciudad intermedia</h4>
+        <p>Seleccione las ciudades que conecta:</p>
+
+        <div class="form-group">
+          <label for="ciudadInt1">Ciudad 1:</label>
+          <select #ciudadInt1 id="ciudadInt1" required>
+            <option
+              *ngFor="let ciudad of Object.keys(ciudadToDelete?.vecinos || {})"
+              [value]="ciudad"
+            >
+              {{ ciudad }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="ciudadInt2">Ciudad 2:</label>
+          <select #ciudadInt2 id="ciudadInt2" required>
+            <option
+              *ngFor="let ciudad of Object.keys(ciudadToDelete?.vecinos || {})"
+              [value]="ciudad"
+            >
+              {{ ciudad }}
+            </option>
+          </select>
+        </div>
+
+        <button
+          class="btn btn-danger"
+          (click)="eliminarCiudadIntermedia()"
+          [disabled]="loadingEliminar"
+        >
+          <span *ngIf="!loadingEliminar">Eliminar como Intermedia</span>
+          <span *ngIf="loadingEliminar">Eliminando...</span>
+        </button>
+      </div>
+
+      <button
+        class="btn btn-cancelar"
+        (click)="closeModal()"
+        style="margin-top: 20px"
+      >
+        Cerrar
+      </button>
     </div>
-
-    <div *ngIf="actionType === 'node'">
-    </div>
-
-    <button class="btn" (click)="closeModal()">Cerrar</button>
   </div>
-</div>
 
+  <!-- Modal para agregar ciudad -->
+  <div class="modal" [ngClass]="{ show: showAddCityModal }">
+    <div class="modal-content">
+      <h3>Agregar Ciudad</h3>
+
+      <form (submit)="agregarCiudad()">
+        <div class="form-group">
+          <label for="nombre">Nombre de la nueva ciudad:</label>
+          <input
+            type="text"
+            #nombre
+            id="nombre"
+            placeholder="Nombre de la ciudad"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="latitud">Latitud:</label>
+          <input
+            type="number"
+            #latitud
+            id="latitud"
+            placeholder="Latitud"
+            step="0.00001"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="longitud">Longitud:</label>
+          <input
+            type="number"
+            #longitud
+            id="longitud"
+            placeholder="Longitud"
+            step="0.00001"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="ciudad1">Ruta Directa con Ciudad 1:</label>
+          <select
+            #ciudad1
+            id="ciudad1"
+            (change)="onCiudad1Change(ciudad1.value)"
+            required
+          >
+            <option *ngFor="let ciudad of ciudades" [value]="ciudad?.name">
+              {{ ciudad?.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="distancia1">Distancia a Ciudad 1 (km):</label>
+          <input
+            type="number"
+            #distancia1
+            id="distancia1"
+            placeholder="Distancia a Ciudad 1"
+            step="0.1"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="ciudad2">Ruta Directa con Ciudad 2 (opcional):</label>
+          <select #ciudad2 id="ciudad2">
+            <option value="">-- Ninguna --</option>
+            <option
+              *ngFor="let ciudad of ciudadesRelacionadas"
+              [value]="ciudad?.name"
+            >
+              {{ ciudad?.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="modal-actions">
+          <button type="submit" class="btn" [disabled]="loadingAgregar">
+            <span *ngIf="!loadingAgregar">Agregar Ciudad</span>
+            <span *ngIf="loadingAgregar">Agregando...</span>
+          </button>
+          <button type="button" class="btn btn-cancelar" (click)="closeModal()">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal para agregar relación -->
+  <div class="modal" [ngClass]="{ show: showAddRelationshipModal }">
+    <div class="modal-content">
+      <h3>Agregar Ruta</h3>
+
+      <form (submit)="agregarRelacion()">
+        <div class="form-group">
+          <label for="ciudadRel1">Ciudad 1:</label>
+          <select #ciudadRel1 id="ciudadRel1" required>
+            <option *ngFor="let ciudad of ciudades" [value]="ciudad?.name">
+              {{ ciudad?.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="ciudadRel2">Ciudad 2:</label>
+          <select #ciudadRel2 id="ciudadRel2" required>
+            <option *ngFor="let ciudad of ciudades" [value]="ciudad?.name">
+              {{ ciudad?.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="distanciaRel">Distancia (km):</label>
+          <input
+            type="number"
+            #distanciaRel
+            id="distanciaRel"
+            placeholder="Distancia"
+            step="0.1"
+            required
+          />
+        </div>
+
+        <div class="modal-actions">
+          <button type="submit" class="btn" [disabled]="loadingRelacion">
+            <span *ngIf="!loadingRelacion">Agregar Relación</span>
+            <span *ngIf="loadingRelacion">Agregando...</span>
+          </button>
+          <button type="button" class="btn btn-cancelar" (click)="closeModal()">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>

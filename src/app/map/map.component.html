@@ -16,7 +16,7 @@
       </option>
     </select>
 
-    <label>Algoritmo:</label>
+    <label>Algoritmo de Búsqueda:</label>
     <select #algoritmo (change)="setAlgoritmo(algoritmo.value)">
       <option value="" disabled selected>Elija el algoritmo de búsqueda</option>
       <option value="1">A*</option>
@@ -24,14 +24,8 @@
       <option value="3">Dijkstra</option>
     </select>
 
-    <button class="btn" (click)="calcularRuta()">Calcular ruta</button>
-    <button (click)="navigateToEditRoute()" class="btn">Editar Ruta</button>
-
-
-
-
-
+    <button class="btn" (click)="calcularRuta()">Calcular Ruta</button>
+    <button (click)="navigateToEditRoute()" class="btn">Gestionar Rutas</button>
   </div>
   <div id="map" class="map-container"></div>
-
 </div>

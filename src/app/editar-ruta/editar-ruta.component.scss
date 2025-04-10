@@ -18,60 +18,18 @@ h2 {
   display: flex;
   justify-content: space-between;
   margin-bottom: 2rem;
+  gap: 1rem;
+  
+  button {
+    flex: 1;
+  }
 }
 
-.form-container {
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 0.75rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.form-group {
-  margin-bottom: 1rem;
-}
-
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #495057;
-  font-weight: 500;
-}
-
-input,
-select {
-  width: 100%;
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-  border: 1px solid #ced4da;
-  font-size: 1rem;
-}
-
-button.btn {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  background-color: #0d6efd;
-  color: white;
-  border: none;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  font-weight: 500;
+.loading-message {
   text-align: center;
-  width: 100%;
-  margin-top: 1rem;
-}
-
-button.btn:hover {
-  background-color: #0b5ed7;
-}
-
-.volver-btn {
-  background-color: #6c757d;
-}
-
-.volver-btn:hover {
-  background-color: #5c636a;
+  padding: 20px;
+  font-size: 1.2rem;
+  color: #666;
 }
 
 table {
@@ -96,73 +54,153 @@ tr:nth-child(even) {
   background-color: #f1f3f5;
 }
 
-.btn-eliminar {
-  background-color: #dc3545;
-  color: white;
-  padding: 0.4rem 0.8rem;
-  font-size: 0.9rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
+.actions-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.btn-eliminar:hover {
-  background-color: #bb2d3b;
-}
-
-/* Estilo general para el modal */
+/* Estilos para los modales */
 .modal {
-  display: none; /* Inicialmente oculto */
-  position: fixed; /* Fijo en la pantalla */
+  display: none;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Fondo semi-transparente */
-  z-index: 1000; /* Para asegurarse de que el modal esté por encima de otros elementos */
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
   justify-content: center;
   align-items: center;
   overflow: auto;
+  
+  &.show {
+    display: flex;
+    animation: fadeIn 0.3s;
+  }
 }
 
 .modal-content {
   background-color: white;
-  padding: 20px;
-  border-radius: 10px;
-  width: 400px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  text-align: center;
+  padding: 2rem;
+  border-radius: 0.75rem;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  
+  h3 {
+    margin-top: 0;
+    color: #343a40;
+  }
+  
+  .form-group {
+    margin-bottom: 1rem;
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #495057;
+      font-weight: 500;
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      border: 1px solid #ced4da;
+      font-size: 1rem;
+    }
+  }
 }
 
-.modal-content button {
-  margin: 10px 0;
-  padding: 10px 20px;
-  background-color: #007bff;
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  
+  button {
+    flex: 1;
+  }
+}
+
+/* Estilos para botones */
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background-color: #0d6efd;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 0.5rem;
   cursor: pointer;
-  font-size: 16px;
+  transition: background-color 0.3s ease;
+  font-weight: 500;
+  text-align: center;
+  
+  &:hover {
+    background-color: #0b5ed7;
+  }
+  
+  &-volver {
+    background-color: #6c757d;
+    
+    &:hover {
+      background-color: #5c636a;
+    }
+  }
+  
+  &-eliminar {
+    background-color: #dc3545;
+    
+    &:hover {
+      background-color: #bb2d3b;
+    }
+  }
+  
+  &-intermedia {
+    background-color: #ffc107;
+    color: #212529;
+    
+    &:hover {
+      background-color: #e0a800;
+    }
+  }
+  
+  &-danger {
+    background-color: #dc3545;
+    
+    &:hover {
+      background-color: #c82333;
+    }
+  }
+  
+  &-confirmar {
+    background-color: #28a745;
+    
+    &:hover {
+      background-color: #218838;
+    }
+  }
+  
+  &-cancelar {
+    background-color: #6c757d;
+    
+    &:hover {
+      background-color: #5a6268;
+    }
+  }
 }
 
-.modal-content button:hover {
-  background-color: #0056b3;
+.relationship-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  
+  li {
+    margin-bottom: 8px;
+  }
 }
 
-/* Estilo para el botón de cerrar */
-.modal-content .btn {
-  background-color: #dc3545;
-}
-
-.modal-content .btn:hover {
-  background-color: #c82333;
-}
-
-/* Si el modal está visible, lo mostramos */
-.modal.show {
-  display: flex; /* Mostrar el modal */
-}
-
-/* Animación de apertura */
+/* Animación */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -170,8 +208,4 @@ tr:nth-child(even) {
   to {
     opacity: 1;
   }
-}
-
-.modal.show {
-  animation: fadeIn 0.5s;
 }
