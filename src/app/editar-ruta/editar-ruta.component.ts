@@ -11,6 +11,7 @@ export class EditarRutaComponent implements OnInit {
   Object = Object;
   ciudades: any[] = [];
   ciudadesRelacionadas: any[] = [];
+  filteredCiudades: any[] = [];
 
   // Modales
   showConfirmModal: boolean = false;
@@ -44,7 +45,8 @@ export class EditarRutaComponent implements OnInit {
   @ViewChild('ciudadInt1') ciudadInt1Input!: ElementRef;
   @ViewChild('ciudadInt2') ciudadInt2Input!: ElementRef;
 
-  constructor(private mapService: MapService, private router: Router) { }
+  constructor(private mapService: MapService, private router: Router) {
+   }
 
   ngOnInit(): void {
     this.cargarCiudades();
@@ -62,6 +64,7 @@ export class EditarRutaComponent implements OnInit {
           name: nombre,
           vecinos: grafo[nombre].vecinos || {} // Asegura que vecinos siempre sea un objeto
         }));
+        this.filteredCiudades = [...this.ciudades];
         this.loadingCiudades = false;
       },
       error: (err) => {
@@ -69,6 +72,17 @@ export class EditarRutaComponent implements OnInit {
         this.loadingCiudades = false;
       },
     });
+  }
+
+  filtrarCiudades(event: any): void {
+    const searchTerm = event.target.value.toLowerCase();
+    if (searchTerm === '') {
+      this.filteredCiudades = [...this.ciudades];
+    } else {
+      this.filteredCiudades = this.ciudades.filter(ciudad =>
+        ciudad.name.toLowerCase().includes(searchTerm)
+      );
+    }
   }
 
   eliminarCiudad(ciudad: any): void {

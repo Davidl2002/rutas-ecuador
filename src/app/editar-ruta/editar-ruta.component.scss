@@ -209,3 +209,28 @@ tr:nth-child(even) {
     opacity: 1;
   }
 }
+
+.search-container {
+  display: flex;
+  justify-content: center; 
+  align-items: center;     
+  margin: 20px 0;          
+}
+
+.search-container input {
+  padding: 10px 15px; 
+  font-size: 16px;    
+  border: 1px solid #ccc;
+  border-radius: 5px; 
+  width: 300px;     
+  outline: none;     
+  transition: border-color 0.3s ease; 
+
+  &::placeholder {
+    color: #aaa; 
+  }
+
+  &:focus {
+    border-color: #007bff; 
+  }
+}

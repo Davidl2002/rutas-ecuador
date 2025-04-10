@@ -1,5 +1,10 @@
 <div class="container">
   <h2>Gestión de Rutas</h2>
+
+  <div class="search-container">
+    <input type="text" placeholder="Buscar Ciudad" (input)="filtrarCiudades($event)" />
+  </div>  
+  
   <div class="header-actions">
     <button class="btn volver-btn" (click)="volverInicio()">
       Volver a Inicio
@@ -15,36 +20,36 @@
     Cargando ciudades...
   </div>
 
-  <table *ngIf="!loadingCiudades && ciudades?.length">
-    <thead>
-      <tr>
-        <th>Ciudad</th>
-        <th>Rutas Directas</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let ciudad of ciudades">
-        <td>{{ ciudad?.name }}</td>
-        <td>
-          <ul>
-            <li *ngFor="let vecino of ciudad?.vecinos | keyvalue">
-              {{ vecino?.key }}: {{ vecino?.value }} km
-            </li>
-          </ul>
-        </td>
-        <td class="actions-cell">
-          <button
-            class="btn btn-eliminar"
-            (click)="abrirConfirmacionEliminar(ciudad)"
-          >
-            <span *ngIf="!loadingEliminar">Eliminar</span>
-            <span *ngIf="loadingEliminar">Eliminando...</span>
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+ <table *ngIf="!loadingCiudades && filteredCiudades?.length">
+  <thead>
+    <tr>
+      <th>Ciudad</th>
+      <th>Rutas Directas</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let ciudad of filteredCiudades">
+      <td>{{ ciudad?.name }}</td>
+      <td>
+        <ul>
+          <li *ngFor="let vecino of ciudad?.vecinos | keyvalue">
+            {{ vecino?.key }}: {{ vecino?.value }} km
+          </li>
+        </ul>
+      </td>
+      <td class="actions-cell">
+        <button
+          class="btn btn-eliminar"
+          (click)="abrirConfirmacionEliminar(ciudad)"
+        >
+          <span *ngIf="!loadingEliminar">Eliminar</span>
+          <span *ngIf="loadingEliminar">Eliminando...</span>
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
   <!-- Modal de confirmación de eliminación -->
   <div class="modal" [ngClass]="{ show: showConfirmModal }">
